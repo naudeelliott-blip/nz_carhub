@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../store';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Camera, Save, ArrowLeft, Lock, Mail, User as UserIcon } from 'lucide-react';
+import { Camera, Save, ArrowLeft, Lock, Mail, User as UserIcon, AlertCircle } from 'lucide-react';
 
 const EditProfile: React.FC = () => {
   const { currentUser, updateUserProfile } = useStore();
@@ -13,7 +13,9 @@ const EditProfile: React.FC = () => {
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [avatar, setAvatar] = useState(currentUser?.avatar || '');
+  const [error, setError] = useState('');
 
   if (!currentUser) {
     return <Navigate to="/auth" />;
@@ -37,6 +39,7 @@ const EditProfile: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     // Construct update object
     const updates: any = {
@@ -47,6 +50,10 @@ const EditProfile: React.FC = () => {
 
     // Only update password if provided
     if (password.trim()) {
+      if (password !== confirmPassword) {
+        setError("New passwords do not match.");
+        return;
+      }
       updates.password = password;
     }
 
@@ -71,6 +78,14 @@ const EditProfile: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           
+          {/* Error Banner */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start gap-3 text-red-700 dark:text-red-400">
+                <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
+                <p className="text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           {/* Avatar Section */}
           <div className="flex flex-col items-center gap-4 pb-6 border-b border-gray-100 dark:border-slate-700">
             <div className="relative group">
@@ -128,19 +143,45 @@ const EditProfile: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">New Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Leave blank to keep current password"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Only enter a password if you wish to change it.</p>
+            {/* Password Section */}
+            <div className="pt-4 border-t border-gray-100 dark:border-slate-700">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Change Password</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">New Password</label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <input 
+                                type="password" 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Leave blank to keep current password"
+                                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Confirm Password - shown only when password field has content */}
+                    {password && (
+                        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Confirm New Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <input 
+                                    type="password" 
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Re-enter new password"
+                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-shadow bg-white dark:bg-slate-700 text-gray-900 dark:text-white ${
+                                        password && confirmPassword && password !== confirmPassword 
+                                            ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
+                                            : 'border-gray-300 dark:border-slate-600'
+                                    }`}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
           </div>
 

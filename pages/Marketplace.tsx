@@ -2,11 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store';
 import { Listing } from '../types';
-import { Filter, Search, MapPin, ArrowLeft, Plus, Image as ImageIcon, Upload, Trash2, X, MessageSquare, Send, BadgeCheck, ThumbsUp, RotateCcw, ChevronDown, ChevronUp, AlertCircle, Edit } from 'lucide-react';
+import { Filter, Search, MapPin, ArrowLeft, Plus, Image as ImageIcon, Upload, Trash2, X, MessageSquare, Send, BadgeCheck, ThumbsUp, RotateCcw, ChevronDown, ChevronUp, AlertCircle, Edit, Heart } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Marketplace: React.FC = () => {
-  const { listings, users, currentUser, addListing, deleteListing, sendDirectMessage, giveReputation, addToHistory } = useStore();
+  const { listings, users, currentUser, addListing, deleteListing, sendDirectMessage, giveReputation, addToHistory, toggleSavedListing } = useStore();
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -265,6 +265,15 @@ const Marketplace: React.FC = () => {
       alert("Reputation given! Thanks for helping the community.");
   };
 
+  const handleToggleSaved = (e: React.MouseEvent, listingId: string) => {
+    e.stopPropagation(); // Prevent card click
+    if (!currentUser) {
+        navigate('/auth');
+        return;
+    }
+    toggleSavedListing(listingId);
+  };
+
   // Helper for input styling
   const getInputClass = (field: string) => 
       `w-full border rounded-lg p-2.5 outline-none bg-white dark:bg-slate-700 text-gray-900 dark:text-white transition-all 
@@ -280,6 +289,7 @@ const Marketplace: React.FC = () => {
 
     const isOwner = currentUser?.id === listing.sellerId;
     const seller = users.find(u => u.id === listing.sellerId);
+    const isSaved = currentUser?.savedListingIds?.includes(listing.id);
 
     return (
         <div className="max-w-5xl mx-auto py-8 px-4">
@@ -312,9 +322,18 @@ const Marketplace: React.FC = () => {
                 {/* Info */}
                 <div>
                     <div className="mb-6">
-                        <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full font-bold uppercase mb-2 tracking-wide">
-                            {listing.type === 'car' ? 'Vehicle' : 'Part'}
-                        </span>
+                        <div className="flex justify-between items-start mb-2">
+                            <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full font-bold uppercase tracking-wide">
+                                {listing.type === 'car' ? 'Vehicle' : 'Part'}
+                            </span>
+                            <button 
+                                onClick={(e) => handleToggleSaved(e, listing.id)}
+                                className={`p-2 rounded-full transition-colors ${isSaved ? 'text-red-500 bg-red-50 dark:bg-red-900/20' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'}`}
+                                title={isSaved ? "Remove from Saved" : "Save Listing"}
+                            >
+                                <Heart size={24} fill={isSaved ? "currentColor" : "none"} />
+                            </button>
+                        </div>
                         <div className="flex justify-between items-start">
                              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{listing.title}</h1>
                              {isOwner && (
@@ -656,11 +675,12 @@ const Marketplace: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredListings.map(listing => {
                     const seller = users.find(u => u.id === listing.sellerId);
+                    const isSaved = currentUser?.savedListingIds?.includes(listing.id);
                     return (
                         <div 
                             key={listing.id} 
                             onClick={() => handleListingClick(listing.id)}
-                            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-900 transition-all cursor-pointer group overflow-hidden"
+                            className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-900 transition-all cursor-pointer group overflow-hidden relative"
                         >
                             <div className="aspect-[4/3] bg-gray-200 dark:bg-slate-700 relative overflow-hidden">
                                 <img 
@@ -681,6 +701,17 @@ const Marketplace: React.FC = () => {
                                         <BadgeCheck size={14} fill="currentColor" className="text-white bg-blue-600 rounded-full" />
                                     </div>
                                 )}
+                                <button 
+                                    onClick={(e) => handleToggleSaved(e, listing.id)}
+                                    className={`absolute top-2 right-2 p-1.5 rounded-full transition-colors z-10 ${
+                                        listing.type === 'part' ? 'top-10' : ''
+                                    } ${
+                                        isSaved ? 'bg-white text-red-500 shadow-md' : 'bg-black/20 text-white hover:bg-black/40'
+                                    }`}
+                                    title={isSaved ? "Unsave" : "Save"}
+                                >
+                                    <Heart size={18} fill={isSaved ? "currentColor" : "none"} />
+                                </button>
                             </div>
                             <div className="p-4">
                                 <h3 className="font-bold text-gray-900 dark:text-white mb-1 line-clamp-1">{listing.title}</h3>

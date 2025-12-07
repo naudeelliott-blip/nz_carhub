@@ -15,6 +15,7 @@ const DEMO_USER: User = {
   joinedDate: '2023-01-15',
   reputation: 0,
   isVerified: false,
+  savedListingIds: [],
 };
 
 const CATEGORIES: ForumCategory[] = [
@@ -43,6 +44,7 @@ interface AppContextType {
   updateUserProfile: (updatedData: Partial<User>) => void;
   verifyUser: (userId: string) => void;
   giveReputation: (userId: string) => void;
+  toggleSavedListing: (listingId: string) => void;
   
   categories: ForumCategory[];
   threads: ForumThread[];
@@ -239,7 +241,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           role: 'user',
           joinedDate: new Date().toISOString(),
           reputation: 0,
-          isVerified: false
+          isVerified: false,
+          savedListingIds: []
       };
 
       setUsers(prev => [...prev, newUser]);
@@ -274,6 +277,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (currentUser?.id === userId) {
           setCurrentUser(prev => prev ? { ...prev, reputation: prev.reputation + 1 } : null);
       }
+  };
+
+  const toggleSavedListing = (listingId: string) => {
+    if (!currentUser) return;
+    
+    const currentSaved = currentUser.savedListingIds || [];
+    const isSaved = currentSaved.includes(listingId);
+    
+    let newSaved;
+    if (isSaved) {
+        newSaved = currentSaved.filter(id => id !== listingId);
+    } else {
+        newSaved = [...currentSaved, listingId];
+    }
+    
+    updateUserProfile({ savedListingIds: newSaved });
   };
 
   const addThread = (newThread: Omit<ForumThread, 'id' | 'views' | 'replies' | 'createdAt'>) => {
@@ -385,7 +404,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider value={{ 
-      currentUser, users, theme, toggleTheme, login, register, logout, updateUserProfile, verifyUser, giveReputation,
+      currentUser, users, theme, toggleTheme, login, register, logout, updateUserProfile, verifyUser, giveReputation, toggleSavedListing,
       categories, threads, posts, listings, directMessages, viewHistory,
       addThread, addListing, updateListing, addPost,
       deleteThread, deletePost, deleteListing,

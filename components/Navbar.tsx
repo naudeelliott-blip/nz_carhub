@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Car, Menu, X, LogOut, Sun, Moon, User as UserIcon, List, Mail, Clock, ChevronDown } from 'lucide-react';
+import { Car, Menu, X, LogOut, Sun, Moon, User as UserIcon, List, Mail, Clock, ChevronDown, Heart } from 'lucide-react';
 import { useStore } from '../store';
 
 const Navbar: React.FC = () => {
@@ -119,6 +119,13 @@ const Navbar: React.FC = () => {
                         <List size={16} /> My Listings
                       </Link>
                       <Link 
+                        to="/saved-listings" 
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <Heart size={16} /> Saved Listings
+                      </Link>
+                      <Link 
                         to="/inbox" 
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 justify-between"
@@ -211,6 +218,7 @@ const Navbar: React.FC = () => {
                 <div className="space-y-1 px-2">
                     <NavItem to="/profile" label="Profile" />
                     <NavItem to="/manage-listings" label="My Listings" />
+                    <NavItem to="/saved-listings" label="Saved Listings" />
                     <NavItem to="/inbox" label={`Inbox ${unreadCount > 0 ? `(${unreadCount})` : ''}`} />
                     <NavItem to="/history" label="History" />
                     <button

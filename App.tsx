@@ -13,6 +13,7 @@ import ManageListings from './pages/ManageListings';
 import Auth from './pages/Auth';
 import History from './pages/History';
 import EditListing from './pages/EditListing';
+import SavedListings from './pages/SavedListings';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
               <Route path="/marketplace/:listingId" element={<Marketplace />} />
               <Route path="/marketplace/edit/:listingId" element={<EditListing />} />
               <Route path="/manage-listings" element={<ManageListings />} />
+              <Route path="/saved-listings" element={<SavedListings />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/edit-profile" element={<EditProfile />} />
               <Route path="/inbox" element={<Inbox />} />

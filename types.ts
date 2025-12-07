@@ -9,6 +9,7 @@ export interface User {
   reputation: number;
   password?: string; // Added for local auth MVP
   isVerified?: boolean;
+  savedListingIds?: string[];
 }
 
 export interface ForumCategory {
